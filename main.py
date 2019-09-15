@@ -77,18 +77,21 @@ cap = cv2.VideoCapture(1)
 cap.set(28, 255) 
 
 
+
 while(True):
     # Capture frame-by-frame
     ret, image = cap.read()
-    d = 400 / image.shape[1]
-    dim = (400, int(image.shape[0] * d))
+    d = 200 / image.shape[1]
+    dim = (200, int(image.shape[0] * d))
     image = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
     output = image.copy()
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('gray',gray)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     gray = clahe.apply(gray)
     blurred = cv2.GaussianBlur(gray, (7, 7), 0)
-    circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, dp=0.001, minDist=50, param1=40, param2=40, minRadius=5, maxRadius=40)
+    cv2.imshow('clahe',blurred)
+    circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, dp=0.001, minDist=30, param1=40, param2=35, minRadius=5, maxRadius=40)
     # todo: refactor
     materials = []
 
@@ -107,10 +110,7 @@ while(True):
             if material == 'Pill':
                 count += 1
                 # draw contour and results in the output image
-                cv2.circle(output, (x, y), d, (0, 255, 0), 2)
-                cv2.putText(output, material,
-                    (x - 40, y), cv2.FONT_HERSHEY_PLAIN,
-                    1.5, (0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+                cv2.circle(output, (x, y), d, (0, 255, 0), 1)
 
     # resize output image while retaining aspect ratio
     d = 800 / output.shape[1]
