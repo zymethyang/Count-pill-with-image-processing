@@ -74,58 +74,20 @@ score = int(clf.score(X_test, y_test) * 100)
 print("Classifier mean accuracy: ", score)
 
 cap = cv2.VideoCapture(1)
-cap.set(28, 255) 
 
 
 while(True):
     # Capture frame-by-frame
     ret, image = cap.read()
-    d = 400 / image.shape[1]
-    dim = (400, int(image.shape[0] * d))
+    d = 200 / image.shape[1]
+    dim = (200, int(image.shape[0] * d))
     image = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
     output = image.copy()
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     gray = clahe.apply(gray)
     blurred = cv2.GaussianBlur(gray, (7, 7), 0)
-    circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, dp=0.001, minDist=50, param1=40, param2=40, minRadius=5, maxRadius=40)
-    # todo: refactor
-    materials = []
-
-    count = 0
-    if circles is not None:
-        # convert coordinates and radii to integers
-        circles = np.round(circles[0, :]).astype("int")
-
-        # loop over coordinates and radii of the circles
-        for (x, y, d) in circles:
-            # extract region of interest
-            roi = image[y - d:y + d, x - d:x + d]
-            # try recognition of material type and add result to list
-            material = predictMaterial(roi)
-            materials.append(material)
-            if material == 'Pill':
-                count += 1
-                # draw contour and results in the output image
-                cv2.circle(output, (x, y), d, (0, 255, 0), 2)
-                cv2.putText(output, material,
-                    (x - 40, y), cv2.FONT_HERSHEY_PLAIN,
-                    1.5, (0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
-
-    # resize output image while retaining aspect ratio
-    d = 800 / output.shape[1]
-    dim = (800, int(output.shape[0] * d))
-    output = cv2.resize(output, dim, interpolation=cv2.INTER_AREA)
-
-    # write summary on output image
-
-    cv2.putText(output, "Number of pill detected: {}".format(count),
-            (5, output.shape[0] - 24), cv2.FONT_HERSHEY_PLAIN,
-            1.0, (0, 0, 255), lineType=cv2.LINE_AA)
-
-    # show output and wait for key to terminate program
-    cv2.imshow("Output", np.hstack([output]))
-
+    cv2.imshow("Output", np.hstack([blurred]))
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
